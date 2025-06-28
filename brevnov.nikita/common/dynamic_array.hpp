@@ -31,35 +31,58 @@ namespace brevnov
     size_t size() const noexcept;
     bool empty() const noexcept;
 
-    void swap(Dynamic_array< T >&) noexcept;
   private:
     T** data_;
     size_t capacity_;
     size_t size_;
     size_t begin_;
+
     void reallocate();
+    void swap(Dynamic_array< T >&) noexcept;
   };
 
   template< typename T >
+  void Dynamic_array< T >::clear() noexcept
+  {
+    while (!empty())
+    {
+      popBack();
+    }
+    size_ = 0;
+    begin_ = 0;
+  }
+
+  template< typename T >
+  void Dynamic_array< T >::swap(Dynamic_array< T >& arr) noexcept
+  {
+    std::swap(data_, arr.data_);
+    std::swap(capacity_, arr.capacity_);
+    std::swap(size_, arr.size_);
+    std::swap(begin_, arr.begin_);
+  }
+
+  template< typename T >
   Dynamic_array< T >::Dynamic_array():
-    data_(new T*[5]),
+    data_(nullptr),
     capacity_(5),
     size_(0),
     begin_(0)
-  {}
+  {
+    data_ = new T*[capacity_]();
+  }
 
   template< typename T >
   Dynamic_array< T >::Dynamic_array(const Dynamic_array< T >& arr):
-    data_(new T*[arr.capacity_]),
+    data_(new T*[arr.capacity_]()),
     capacity_(arr.capacity_),
-    size_(arr.size_),
-    begin_(arr.begin_)
+    size_(0),
+    begin_(0)
   {
     try
     {
-      for (size_t i = 0; i < size_; ++i)
+      for (; size_ < arr.size(); ++size_)
       {
-        data_[i] = new T(*arr.data_[i + begin_]);
+        data_[size_] = new T(*arr.data_[size_ + arr.begin_]);
       }
     }
     catch (...)
@@ -80,7 +103,7 @@ namespace brevnov
 
   template< typename T >
   Dynamic_array< T >::Dynamic_array(size_t capacity):
-    data_(new T*[capacity]),
+    data_(new T*[capacity]()),
     capacity_(capacity),
     size_(0),
     begin_(0)
@@ -91,6 +114,7 @@ namespace brevnov
   {
     clear();
     delete[] data_;
+    capacity_ = 0;
   }
 
   template< typename T >
@@ -149,6 +173,7 @@ namespace brevnov
       throw std::logic_error("Empty for popBack()");
     }
     delete data_[begin_ + size_ - 1];
+    data_[begin_ + size_ - 1] = nullptr;
     --size_;
   }
 
@@ -160,8 +185,13 @@ namespace brevnov
       throw std::logic_error("Empty for popFront()");
     }
     delete data_[begin_];
+    data_[begin_] = nullptr;
     ++begin_;
     --size_;
+    if (empty())
+    {
+      begin_ = 0;
+    }
   }
 
   template< typename T >
@@ -187,15 +217,6 @@ namespace brevnov
   }
 
   template< typename T >
-  void Dynamic_array< T >::clear() noexcept
-  {
-    while (!empty())
-    {
-      popFront();
-    }
-  }
-
-  template< typename T >
   size_t Dynamic_array< T >::size() const noexcept
   {
     return size_;
@@ -217,15 +238,6 @@ namespace brevnov
       newArr.push(*data_[i + begin_]);
     }
     swap(newArr);
-  }
-
-  template< typename T >
-  void Dynamic_array< T >::swap(Dynamic_array< T >& arr) noexcept
-  {
-    std::swap(data_, arr.data_);
-    std::swap(capacity_, arr.capacity_);
-    std::swap(size_, arr.size_);
-    std::swap(begin_, arr.begin_);
   }
 }
 
