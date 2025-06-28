@@ -140,7 +140,7 @@ namespace mozhegova
     {
       data_ = resize(data_, capacity_);
     }
-    data_[size++] = value;
+    data_[size_++] = value;
   }
 }
 

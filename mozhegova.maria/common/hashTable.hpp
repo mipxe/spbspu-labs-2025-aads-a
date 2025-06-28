@@ -38,6 +38,7 @@ namespace mozhegova
 
     size_t erase(const Key &) noexcept;
     Iter erase(cIter) noexcept;
+    Iter erase(Iter) noexcept;
     Iter erase(cIter first, cIter last) noexcept;
 
     std::pair< Iter, bool > insert(const std::pair< Key, Value > & val);
@@ -304,6 +305,16 @@ namespace mozhegova
     table_[currSlot].deleted = true;
     --size_;
     return Iter{this, cit.index_ + 1};
+  }
+
+  template< class Key, class Value, class Hash, class Equal >
+  HashIter< Key, Value, Hash, Equal > HashTable< Key, Value, Hash, Equal >::erase(Iter it) noexcept
+  {
+    size_t currSlot = it.index_;
+    table_[currSlot].occupied = false;
+    table_[currSlot].deleted = true;
+    --size_;
+    return Iter{this, it.index_ + 1};
   }
 
   template< class Key, class Value, class Hash, class Equal >
